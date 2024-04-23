@@ -1,6 +1,4 @@
 
-//PRUEBA DE COMMITTTTTTTTT
-
 #pragma region INCLUDE
 
 #include <GL/glew.h>
