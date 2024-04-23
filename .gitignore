@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Carpetas de Recursos (texturas, audio...), compilacion Release y Debug
+res/
+Release/
+Debug/
+x64/
