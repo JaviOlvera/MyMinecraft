@@ -19,4 +19,4 @@ The goal of this proyect is not to COPY Minecraft and publish it as my own game.
 
 <br>
 
-⚠️ *NOTE:* the project NEEDS a folder called *res* to work propertly, in the repository its missing because all its content was minecraft extracted files, so I decided not to include the in the git repository.
+⚠️ *NOTE:* the project NEEDS a folder called *res* to work propertly. It is missing in the repository because all its content was original minecraft files (textures, audio...), so I decided not to include it in the git repository.
