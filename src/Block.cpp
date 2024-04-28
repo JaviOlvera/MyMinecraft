@@ -276,12 +276,13 @@ void Block::Create()
             {
                 for (int b = 0; b < chunksAround[i]->BrightBlocks.size(); b++)
                 {
-                    float dist = length(chunksAround[i]->BrightBlocks[b]->position - position);
-                    float limit = chunksAround[i]->BrightBlocks[b]->brightness / 2;
+                    vec3 blockPos = vec3(chunksAround[i]->BrightBlocks[b].x, chunksAround[i]->BrightBlocks[b].y, chunksAround[i]->BrightBlocks[b].z);
+                    float dist = length(blockPos - position);
+                    float limit = chunksAround[i]->BrightBlocks[b].w / 2;
 
                     if (dist < limit)
                     {
-                        if (chunksAround[i]->BrightBlocks[b]->position.x > position.x)
+                        if (blockPos.x > position.x)
                         {
                             if (positiveLighting.x < limit - dist)
                             {
@@ -296,7 +297,7 @@ void Block::Create()
                             }
                         }
 
-                        if (chunksAround[i]->BrightBlocks[b]->position.y > position.y)
+                        if (blockPos.y > position.y)
                         {
                             if (positiveLighting.y < limit - dist)
                             {
@@ -311,7 +312,7 @@ void Block::Create()
                             }
                         }
 
-                        if (chunksAround[i]->BrightBlocks[b]->position.z > position.z)
+                        if (blockPos.z > position.z)
                         {
                             if (positiveLighting.z < limit - dist)
                             {
@@ -323,73 +324,6 @@ void Block::Create()
                             if (negativeLighting.z < limit - dist)
                             {
                                 negativeLighting.z = limit - dist;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (false)
-            {
-                for (int i = 0; i < Chunks.size(); i++)
-                {
-                    for (int u = 0; u < Chunks.size(); u++)
-                    {
-                        if (position.x >= Chunks[i][u].position.x && position.x <= Chunks[i][u].position.x + Chunks[i][u].size + 1 &&
-                            position.z >= Chunks[i][u].position.y && position.z <= Chunks[i][u].position.y + Chunks[i][u].size + 1)
-                        {
-                            for (int b = 0; b < Chunks[i][u].BrightBlocks.size(); b++)
-                            {
-                                float dist = length(Chunks[i][u].BrightBlocks[b]->position - position);
-                                float limit = Chunks[i][u].BrightBlocks[b]->brightness / 2;
-
-                                if (dist < limit)
-                                {
-                                    if (Chunks[i][u].BrightBlocks[b]->position.x > position.x)
-                                    {
-                                        if (positiveLighting.x < limit - dist)
-                                        {
-                                            positiveLighting.x = limit - dist;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (negativeLighting.x < limit - dist)
-                                        {
-                                            negativeLighting.x = limit - dist;
-                                        }
-                                    }
-
-                                    if (Chunks[i][u].BrightBlocks[b]->position.y > position.y)
-                                    {
-                                        if (positiveLighting.y < limit - dist)
-                                        {
-                                            positiveLighting.y = limit - dist;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (negativeLighting.y < limit - dist)
-                                        {
-                                            negativeLighting.y = limit - dist;
-                                        }
-                                    }
-
-                                    if (Chunks[i][u].BrightBlocks[b]->position.z > position.z)
-                                    {
-                                        if (positiveLighting.z < limit - dist)
-                                        {
-                                            positiveLighting.z = limit - dist;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (negativeLighting.z < limit - dist)
-                                        {
-                                            negativeLighting.z = limit - dist;
-                                        }
-                                    }
-                                }
                             }
                         }
                     }

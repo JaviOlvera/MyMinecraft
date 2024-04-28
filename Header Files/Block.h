@@ -28,7 +28,7 @@ public:
     //vector<vector> de Bloques que contiene el Chunk ordenados tal que [blockType][CreationOrder]
     vector<vector<Block>> blocks;
 
-    vector<Block*> BrightBlocks;    //TODO: CONVERTIR EN PUNTEROOOOO
+    vector<vec4> BrightBlocks;
 
     //Cada posicion x y z se asocia a 2 index para el vector<vector<Block>> blocks, tal que [blockType][CreationOrder]
     BlocksMap blocksMap;
@@ -259,7 +259,7 @@ public:
 
                     if (block.brightness > 0)
                     {
-                        Chunks[i][u].BrightBlocks.push_back(&Chunks[i][u].blocks[block.id][Chunks[i][u].blocks[block.id].size()-1]);
+                        Chunks[i][u].BrightBlocks.push_back(vec4(block.position, block.brightness));
                     }
                 }
             }
@@ -491,4 +491,25 @@ static vector<Chunk*> GetChunksAroundBlock(Block* block)
     }
 
     return ret;
+}
+
+static bool isBlockInPos(vec3 pos)
+{
+    int x = pos.x;
+    int y = pos.y;
+    int z = pos.z;
+
+    for (int i = 0; i < Chunks.size(); i++)
+    {
+        for (int u = 0; u < Chunks.size(); u++)
+        {
+            if (x >= Chunks[i][u].position.x && x < Chunks[i][u].position.x + Chunks[i][u].size &&
+                z >= Chunks[i][u].position.y && z < Chunks[i][u].position.y + Chunks[i][u].size)
+            {
+                auto iter = Chunks[i][u].blocksMap.find(std::make_tuple(x, y, z));
+
+                return iter != Chunks[i][u].blocksMap.end();
+            }
+        }
+    }
 }

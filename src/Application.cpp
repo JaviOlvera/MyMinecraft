@@ -855,7 +855,7 @@ int main(void)
 
     #pragma endregion
 
-        bool candoonce = true;
+    bool candoonce = true;
 
     
     while (!glfwWindowShouldClose(window))
@@ -980,12 +980,21 @@ int main(void)
 
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
         {
-            Block posBlock = Block(25, vec3(floor(camera.entity.position.x + 2), floor(camera.entity.position.y), floor(camera.entity.position.z)), Color(), 1, shader, currentTextures, blocksMap);
-            posBlock.addBlock(posBlock, blocksMap, Blocks, Chunks);
+            vec3 Pos = vec3(floor(camera.entity.position.x + 2), floor(camera.entity.position.y), floor(camera.entity.position.z));
+            
+            if (!isBlockInPos(Pos))
+            {
+                Block posBlock = Block(25, Pos, Color(), 1, shader, currentTextures, blocksMap);
+                posBlock.addBlock(posBlock, blocksMap, Blocks, Chunks);
+
+                cout << "block placed" << endl;
+            }
+            
         }
 
 //---------------------------RENDER---------------------------------------
        
+
 
         #pragma region RENDER BLOQUES Y TEXTURAS
         int dbg = 0;
@@ -1150,7 +1159,7 @@ int main(void)
 
         #pragma region FIN DEL RENDER
 
-        if (true)
+        if (false)
         {
             //currentTextures.clear();
 
