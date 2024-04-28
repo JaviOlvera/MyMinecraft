@@ -427,7 +427,7 @@ static Block RayCastBlock(vec3 origin, vec3 dir, float length = 100.0f)
 
     for (int i = 0; i < length / precision; i++)
     {
-        if (helpBlock.isBlock(floor(pos.x), floor(pos.y), floor(pos.z), blocksMap, Chunks))
+        if (isBlock(vec3(floor(pos.x), floor(pos.y), floor(pos.z))))
         {
             return helpBlock.GetBlock(floor(pos.x), floor(pos.y), floor(pos.z), blocksMap, Blocks, Chunks);
             break;

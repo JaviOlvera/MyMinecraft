@@ -814,7 +814,7 @@ int main(void)
 
                 if (chances > 1.4f)
                 {
-                    if (helpBlock.isBlock(i, yPos, u, blocksMap, Chunks))
+                    if (isBlock(vec3(i, yPos, u)))
                     {
                         Block grass = Block(13, vec3(i, yPos+1, u), Color(0.3f, 1, 0.3f, 1), 1, shader, currentTextures, blocksMap);
                         grass.addBlock(grass, blocksMap, Blocks, Chunks);
@@ -842,7 +842,7 @@ int main(void)
 
                 if (chances > 1.8f)
                 {
-                    if (helpBlock.isBlock(i, yPos, u, blocksMap, Chunks))
+                    if (isBlock(vec3(i, yPos, u)))
                     {
                         Block flower = Block(14 + (rand() % (10 + 1)), vec3(i, yPos + 1, u), Color(), 1, shader, currentTextures, blocksMap);
                         flower.addBlock(flower, blocksMap, Blocks, Chunks);
@@ -982,7 +982,7 @@ int main(void)
         {
             vec3 Pos = vec3(floor(camera.entity.position.x + 2), floor(camera.entity.position.y), floor(camera.entity.position.z));
             
-            if (!isBlockInPos(Pos))
+            if (!isBlock(Pos))
             {
                 Block posBlock = Block(25, Pos, Color(), 1, shader, currentTextures, blocksMap);
                 posBlock.addBlock(posBlock, blocksMap, Blocks, Chunks);

@@ -268,7 +268,7 @@ public:
         //blocksMap[std::make_tuple((int)block.position.x, (int)block.position.y, (int)block.position.z)] = { {block.id, (int)Blocks[block.id].size() - 1} };
     }
 
-    static bool isBlock(int x, int y, int z, BlocksMap& blocksMap, std::vector<std::vector<Chunk>>& Chunks)
+    /*static bool isBlock(int x, int y, int z, BlocksMap& blocksMap, std::vector<std::vector<Chunk>>& Chunks)
     {
         for (int i = 0; i < Chunks.size(); i++)
         {
@@ -283,7 +283,7 @@ public:
                 }
             }
         } 
-    }
+    }*/
 
     static bool checkOclude(int x, int y, int z, BlocksMap& blocksMap, std::vector<std::vector<Block>>& Blocks, std::vector<std::vector<Chunk>>& Chunks)
     {
@@ -493,7 +493,7 @@ static vector<Chunk*> GetChunksAroundBlock(Block* block)
     return ret;
 }
 
-static bool isBlockInPos(vec3 pos)
+static bool isBlock(vec3 pos)
 {
     int x = pos.x;
     int y = pos.y;
