@@ -232,6 +232,7 @@ public:
         return Block(-2, emptyTextures, blocksMap);
     }
 
+
     static void addBlock(Block block, BlocksMap& blocksMap, std::vector<std::vector<Block>>& Blocks, std::vector<std::vector<Chunk>>& Chunks)
     {
         while (Blocks.size() < block.id + 1)

@@ -810,13 +810,15 @@ int main(void)
             for (int u = 0; u < groundScale; u++)
             {
                 int yPos = floor(img[i][u] * 8.5f) - 10;
+                vec3 blockPos = vec3(1.0f * i - 3.0f, yPos, 1.0f * u - 6.0f);
+
                 float chances = ((float)(rand() % 101) / 100.0f / 2) * 3 * ((grassNoise[i][u]) / 3) / intensity;
 
                 if (chances > 1.4f)
                 {
-                    if (isBlock(vec3(i, yPos, u)))
+                    if (isBlock(blockPos) && !isBlock(vec3(blockPos.x, blockPos.y + 1, blockPos.z)))
                     {
-                        Block grass = Block(13, vec3(i, yPos+1, u), Color(0.3f, 1, 0.3f, 1), 1, shader, currentTextures, blocksMap);
+                        Block grass = Block(13, vec3(blockPos.x, blockPos.y + 1, blockPos.z), Color(0.3f, 1, 0.3f, 1), 1, shader, currentTextures, blocksMap);
                         grass.addBlock(grass, blocksMap, Blocks, Chunks);
                     }
                 }
@@ -840,23 +842,13 @@ int main(void)
                 int yPos = floor(img[i][u] * 8.5f) - 10;
                 vec3 blockPos = vec3(1.0f * i - 3.0f, yPos, 1.0f * u - 6.0f);
 
-                //cout << "CHECK: " << isBlock(vec3(1.0f * i - 3.0f, yPos, 1.0f * u - 6.0f)) << endl;
-
                 float chances = ((float)(rand() % 101) / 100.0f / 2) * 3 * ((grassNoise[i][u]) / 3) / intensity;
 
                 if (chances > 1.8f)
                 {
-                    if (isBlock(blockPos) && !isBlock(blockPos + vec3(0, 1, 0)))
+                    if (isBlock(blockPos) && !isBlock(vec3(blockPos.x, blockPos.y + 1, blockPos.z)))
                     {
-                        if (skybox.GetBlock(blockPos.x, blockPos.y + 1, blockPos.x, blocksMap, Blocks, Chunks).id == -2)
-                        {
-                            cout << "BLOQUE INTERCEPTADO" << endl;
-
-                            //skybox.GetBlock dice que hay un bloque en esa posicion y CREO que se cumple para TODAS las flores
-                            //sin embargo isBlock(vec3(i, yPos + 1, u) es falso, aun revisando la misma posicion
-                        }
-
-                        Block flower = Block(14 + (rand() % (10 + 1)), blockPos + vec3(0, 1, 0), Color(), 1, shader, currentTextures, blocksMap);
+                        Block flower = Block(14 + (rand() % (10 + 1)), vec3(blockPos.x, blockPos.y + 1, blockPos.z), Color(), 1, shader, currentTextures, blocksMap);
                         flower.addBlock(flower, blocksMap, Blocks, Chunks);       
                     }
                 }
