@@ -206,7 +206,7 @@ public:
     {
         for (int i = 0; i < Chunks.size(); i++)
         {
-            for (int u = 0; u < Chunks.size(); u++)
+            for (int u = 0; u < Chunks[i].size(); u++)
             {
                 if (x >= Chunks[i][u].position.x && x < Chunks[i][u].position.x + Chunks[i][u].size &&
                     z >= Chunks[i][u].position.y && z < Chunks[i][u].position.y + Chunks[i][u].size)
@@ -243,7 +243,7 @@ public:
 
         for (int i = 0; i < Chunks.size(); i++)
         {
-            for (int u = 0; u < Chunks.size(); u++)
+            for (int u = 0; u < Chunks[i].size(); u++)
             {
                 if (block.position.x >= Chunks[i][u].position.x && block.position.x < Chunks[i][u].position.x + Chunks[i][u].size &&
                     block.position.z >= Chunks[i][u].position.y && block.position.z < Chunks[i][u].position.y + Chunks[i][u].size)
@@ -272,7 +272,7 @@ public:
     {
         for (int i = 0; i < Chunks.size(); i++)
         {
-            for (int u = 0; u < Chunks.size(); u++)
+            for (int u = 0; u < Chunks[i].size(); u++)
             {
                 if (x >= Chunks[i][u].position.x && x < Chunks[i][u].position.x + Chunks[i][u].size &&
                     z >= Chunks[i][u].position.y && z < Chunks[i][u].position.y + Chunks[i][u].size)
@@ -501,15 +501,24 @@ static bool isBlock(vec3 pos)
 
     for (int i = 0; i < Chunks.size(); i++)
     {
-        for (int u = 0; u < Chunks.size(); u++)
+        for (int u = 0; u < Chunks[i].size(); u++)
         {
             if (x >= Chunks[i][u].position.x && x < Chunks[i][u].position.x + Chunks[i][u].size &&
                 z >= Chunks[i][u].position.y && z < Chunks[i][u].position.y + Chunks[i][u].size)
             {
                 auto iter = Chunks[i][u].blocksMap.find(std::make_tuple(x, y, z));
 
-                return iter != Chunks[i][u].blocksMap.end();
+                if (iter != Chunks[i][u].blocksMap.end())
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }
+
+    return false;
 }
