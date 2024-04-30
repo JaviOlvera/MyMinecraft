@@ -420,9 +420,8 @@ static void AdjustEntityCollision(Entity& entity, vec3& oldPosition, vec3& final
     entity.wasFalling = entity.falling;
 }
 
-static Block RayCastBlock(vec3 origin, vec3 dir, float length = 100.0f)
+static Block RayCastBlock(vec3 origin, vec3 dir, float length = 100.0f, float precision = 0.5f)
 {
-    float precision = 0.5f;
     vec3 pos = origin;
 
     for (int i = 0; i < length / precision; i++)
@@ -435,6 +434,29 @@ static Block RayCastBlock(vec3 origin, vec3 dir, float length = 100.0f)
 
         pos += normalize(dir) * precision;
     }
+
+    std::vector<std::string> emptyTextures;
+    return Block(-2, emptyTextures, blocksMap);
+}
+
+static vec3 RayCastBlockFace(vec3 origin, vec3 dir, float length = 100.0f, float precision = 0.5f)
+{
+    vec3 pos = origin;
+    vec3 lastRaycastPos;
+
+    for (int i = 0; i < length / precision; i++)
+    {
+        if (isBlock(vec3(floor(pos.x), floor(pos.y), floor(pos.z))))
+        {
+            return vec3(floor(lastRaycastPos.x), floor(lastRaycastPos.y), floor(lastRaycastPos.z));
+            break;
+        }
+
+        lastRaycastPos = pos;
+        pos += normalize(dir) * precision;
+    }
+
+    return vec3(-999, -999, -999);
 }
 
 #endif //PHYSICS_H

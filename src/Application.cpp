@@ -44,6 +44,7 @@
 #include "Utility.h"
 #include "Texture.h"
 #include "BlockSearch.h"
+#include "Timer.h"
 
 
 
@@ -483,7 +484,6 @@ extern vector<float> planeFromPoints(const vec3& p1, const vec3& p2, const vec3&
 
 #pragma endregion
 
-float gameTime = 0.0f;
 
 int main(void)
 {
@@ -600,6 +600,9 @@ int main(void)
     int skyScale = 100;
     Block skybox = Block(-1, vec3(0,0,0), Color(171.0f / 255.0f, 197.0f / 255.0f, 1.0f, 1.0f), skyScale, shader, currentTextures, blocksMap);
 
+    //Timers
+    Timer GameTimer = Timer();
+    Timer BlockPlaceTimer = Timer(false);
 
     #pragma region TERRENO
         
@@ -864,8 +867,6 @@ int main(void)
     
     while (!glfwWindowShouldClose(window))
     {
-        gameTime += deltaTime;
-
         auto startTime = std::chrono::steady_clock::now();     
 
         #pragma region INICIO DEL LOOP
@@ -969,11 +970,23 @@ int main(void)
 
         #pragma region SELECT BLOCKS
 
-        vec3 selectedBlock;
+        vec3 selectedBlock = vec3(-999, -999, -999);
+        vec3 selectedBlockFace = vec3(-999, -999, -999);
         bool breakSelectedBlock = false;
 
-        selectedBlock = RayCastBlock(camera.entity.position, camera.Orientation, 10.0f).position;
-        cout << selectedBlock.x << " " << selectedBlock.y << " " << selectedBlock.z << endl;
+        //TODO: HACER QUE EL RAYCAST SEA RECURSIVO, EMPIECE A SALTOS GRANDES Y AL DETECTAR ALGO RETROCEDA A PASOS PEQUEÑOS PARA MAYOR PRECISION Y FPSs
+
+        Block blockRaycast = RayCastBlock(camera.entity.position, camera.Orientation, 4.0f, 0.1f);
+        bool raycasted = blockRaycast.id != -2;
+
+        if (raycasted)
+        {
+            selectedBlock = blockRaycast.position;
+        }
+
+        selectedBlockFace = RayCastBlockFace(camera.entity.position, camera.Orientation, 4.0f, 0.02f);
+
+        //cout << selectedBlock.x << " " << selectedBlock.y << " " << selectedBlock.z << endl;
  
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         {
@@ -985,12 +998,15 @@ int main(void)
 
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
         {
-            vec3 Pos = vec3(floor(camera.entity.position.x + 2), floor(camera.entity.position.y), floor(camera.entity.position.z));
+            //vec3 Pos = vec3(floor(camera.entity.position.x + 2), floor(camera.entity.position.y), floor(camera.entity.position.z));
+            vec3 Pos = selectedBlockFace;
             
-            if (!isBlock(Pos))
+            if (!isBlock(Pos) && selectedBlockFace != vec3(-999, -999, -999) && BlockPlaceTimer.time() > 0.25f)
             {
                 Block posBlock = Block(25, Pos, Color(), 1, shader, currentTextures, blocksMap);
                 posBlock.addBlock(posBlock, blocksMap, Blocks, Chunks);
+
+                BlockPlaceTimer.ResetTimer();
             }
             
         }

@@ -173,6 +173,7 @@
     <ClInclude Include="Header Files\FastNoiseLite.h" />
     <ClInclude Include="Header Files\Physics.h" />
     <ClInclude Include="Header Files\Texture.h" />
+    <ClInclude Include="Header Files\Timer.h" />
     <ClInclude Include="Header Files\Utility.h" />
     <ClInclude Include="src\vendor\stb_image\stb_image.h" />
   </ItemGroup>
