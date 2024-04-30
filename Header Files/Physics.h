@@ -232,7 +232,15 @@ public:
         }
     }
 
+    bool isCollidingWithBlock(vec3 cubeCenter, vec3 cubeScale)
+    {
+        bool xCol = (abs(ColliderCenter().x - cubeCenter.x) <= ColliderRadius().x + cubeScale.x);
+        bool yCol = (abs(ColliderCenter().y - cubeCenter.y) <= ColliderRadius().y + cubeScale.y);
+        bool zCol = (abs(ColliderCenter().z - cubeCenter.z) <= ColliderRadius().z + cubeScale.z);
 
+        return (xCol && yCol && zCol);
+    }
+    
 
     // Operador de asignación
     Entity& operator=(const Entity& other)

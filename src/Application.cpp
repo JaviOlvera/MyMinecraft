@@ -1001,7 +1001,21 @@ int main(void)
             //vec3 Pos = vec3(floor(camera.entity.position.x + 2), floor(camera.entity.position.y), floor(camera.entity.position.z));
             vec3 Pos = selectedBlockFace;
             
-            if (!isBlock(Pos) && selectedBlockFace != vec3(-999, -999, -999) && BlockPlaceTimer.time() > 0.25f)
+            vec3 blockCenter = vec3
+            (
+                selectedBlockFace.x + 0.5f,
+                selectedBlockFace.y + 0.5f,
+                selectedBlockFace.z + 0.5f
+            );
+
+            vec3 blockScale = vec3
+            (
+                blockRaycast.scale / 2.0f,
+                blockRaycast.scale / 2.0f,
+                blockRaycast.scale / 2.0f
+            );
+
+            if (!isBlock(Pos) && !camera.entity.isCollidingWithBlock(blockCenter, blockScale) && selectedBlockFace != vec3(-999, -999, -999) && BlockPlaceTimer.time() > 0.25f)
             {
                 Block posBlock = Block(25, Pos, Color(), 1, shader, currentTextures, blocksMap);
                 posBlock.addBlock(posBlock, blocksMap, Blocks, Chunks);
