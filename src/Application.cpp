@@ -242,9 +242,14 @@ extern int currentAudioId;
 Block helpBlock = Block(-1, vec3(-99.0f, -999.0f, -99.0f), Color(0, 0, 0, 0), 1, 0, currentTextures, blocksMap);
 extern Block helpBlock;
 
-vec3 skyLight = normalize(vec3(1, -1, 0));
+vec3 skyLight = normalize(vec3(1, 0, 0));
 vec3 startSkyLight = skyLight;
 extern vec3 skyLight;
+
+float dayTime = 0;
+extern float dayTime;
+float dayDuration = 20*60;
+extern float dayDuration;
 
 int ChunksRenderDistance = 1;
 extern int ChunksRenderDistance;
@@ -482,6 +487,12 @@ vector<float> planeFromPoints(const vec3& p1, const vec3& p2, const vec3& p3, co
 }
 
 extern vector<float> planeFromPoints(const vec3& p1, const vec3& p2, const vec3& p3, const vec3& p4);
+
+// Función para realizar una interpolación lineal entre tres valores float
+float lerp3(float a, float b, float c, float t)
+{
+    return (1.0f - t) * ((1.0f - t) * a + t * b) + t * ((1.0f - t) * b + t * c);
+}
 
 #pragma endregion
 
@@ -868,8 +879,36 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         auto startTime = std::chrono::steady_clock::now();
+
+        dayTime = ((GameTimer.time() / dayDuration) - floor(GameTimer.time() / dayDuration))*10;
         
-        skyLight = rotate(startSkyLight, radians(40.0f * GameTimer.time()), vec3(0,0,1));
+        skyLight = rotate(startSkyLight, radians(dayTime * -360.0f / dayDuration), vec3(0,0,1));
+
+        Color dayColor = Color(171.0f / 255.0f, 197.0f / 255.0f, 1.0f, 1.0f);
+        Color middleColor = Color(255.0f / 255.0f, 183.0f / 255.0f, 0.0f, 1.0f);
+        Color nightColor = Color(0.0f, 10.0f / 255.0f, 50.0f / 255.0f, 1.0f);
+        
+
+        float skyLerp = 1;
+        float sunLerp = dayTime / dayDuration;
+
+        if (sunLerp > 0.25f && sunLerp < 0.5f)
+        {
+            skyLerp = (0.25f - (sunLerp - 0.25f)) * 4;
+        }
+        else if (sunLerp >= 0.5f && sunLerp <= 0.85f)
+        {
+            skyLerp = 0;
+        }
+        else if (sunLerp > 0.85f && sunLerp < 1.0f)
+        {
+            skyLerp = (sunLerp - 0.85f) * 6.67f;
+        }
+        
+
+        skybox.color = Color(lerp3(nightColor.r, middleColor.r, dayColor.r, skyLerp),
+                             lerp3(nightColor.g, middleColor.g, dayColor.g, skyLerp),
+                             lerp3(nightColor.b, middleColor.g, dayColor.b, skyLerp), 0);
 
         Chunks[0][0].blocks[9][0].position = vec3(GameTimer.time(), 0, 0);
         Chunks[0][0].blocks[9][0].Recalculate();

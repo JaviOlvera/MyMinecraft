@@ -1,6 +1,7 @@
 #pragma once
 #include <tuple>       // Para std::tuple
 #include <functional>  // Para std::hash
+#include <glm/glm.hpp>
 
 /*class Vector3
 {
@@ -25,6 +26,24 @@ public:
 	{
 
 	};
+	Color(glm::vec4 color) : r(color.x), g(color.y), b(color.z), a(color.w)
+	{
+
+	};
+	Color(glm::vec3 color, float w) : r(color.x), g(color.y), b(color.z), a(w)
+	{
+
+	};
+
+	glm::vec3 toVec3()
+	{
+		return glm::vec3(r, g, b);
+	}
+
+	glm::vec4 toVec4()
+	{
+		return glm::vec4(r, g, b, a);
+	}
 };
 
 // Función hash personalizada para std::tuple<int, int, int>

@@ -202,6 +202,8 @@ extern vector<vector<Block>> Blocks;
 extern vec3 skyLight;
 extern int ChunksRenderDistance;
 extern int ChunksSize;
+extern float dayTime;
+extern float dayDuration;
 
 float LightSmoothFunction(float x)
 {
@@ -307,7 +309,7 @@ void Block::Create()
                     {
                         bool hasReceivedLight = false;
 
-                        if (blockPos.x > position.x)
+                        if (blockPos.x >= position.x)
                         {
                             if (positiveLighting.x < light * LightSmoothFunction(dist / maxDist))
                             {
@@ -324,7 +326,7 @@ void Block::Create()
                             }
                         }
 
-                        if (blockPos.y > position.y)
+                        if (blockPos.y >= position.y)
                         {
                             if (positiveLighting.y < light * LightSmoothFunction(dist / maxDist))
                             {
@@ -341,7 +343,7 @@ void Block::Create()
                             }
                         }
 
-                        if (blockPos.z > position.z)
+                        if (blockPos.z >= position.z)
                         {
                             if (positiveLighting.z < light * LightSmoothFunction(dist / maxDist))
                             {
@@ -396,6 +398,11 @@ void Block::Create()
             positiveLighting = vec3(0, 0, 0);
             negativeLighting = vec3(0, 0, 0);
         }
+
+
+        glUniform1f(glGetUniformLocation(shader, "u_dayTime"), dayTime);
+        glUniform1f(glGetUniformLocation(shader, "u_dayDuration"), dayDuration);
+        glUniform1f(glGetUniformLocation(shader, "u_isEmissive"), (brightness > 0));
 
         #pragma endregion
 
