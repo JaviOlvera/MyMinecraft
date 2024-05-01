@@ -243,6 +243,7 @@ Block helpBlock = Block(-1, vec3(-99.0f, -999.0f, -99.0f), Color(0, 0, 0, 0), 1,
 extern Block helpBlock;
 
 vec3 skyLight = normalize(vec3(1, -1, 0));
+vec3 startSkyLight = skyLight;
 extern vec3 skyLight;
 
 int ChunksRenderDistance = 1;
@@ -708,16 +709,12 @@ int main(void)
         Block blockX = Block(1, vec3(1.0f, 0.0f, 0.0f), Color(1.0f, 0.0f, 0.0f, 1.0f), 1, shader, currentTextures, blocksMap);
         Block blockY = Block(13, vec3(0.0f, 1.0f, 0.0f), Color(0.0f, 1.0f, 0.0f, 1.0f), 1, shader, currentTextures, blocksMap);
         Block blockZ = Block(3, vec3(0.0f, 0.0f, 1.0f), Color(0.0f, 0.0f, 1.0f, 1.0f), 1, shader, currentTextures, blocksMap);
-        Block blockZ2 = Block(3, vec3(0.0f, 0.0f, 5.0f), Color(0.0f, 0.0f, 1.0f, 1.0f), 1, shader, currentTextures, blocksMap);
-        Block blockZ3 = Block(3, vec3(0.0f, 0.0f, 9.0f), Color(0.0f, 0.0f, 1.0f, 1.0f), 1, shader, currentTextures, blocksMap);
-        Block blockZ4 = Block(3, vec3(0.0f, 0.0f, 10.0f), Color(0.0f, 0.0f, 1.0f, 1.0f), 1, shader, currentTextures, blocksMap);
+
 
         blockX.addBlock(blockX, blocksMap, Blocks, Chunks);
         blockY.addBlock(blockY, blocksMap, Blocks, Chunks);
         blockZ.addBlock(blockZ, blocksMap, Blocks, Chunks);
-        blockZ2.addBlock(blockZ2, blocksMap, Blocks, Chunks);
-        blockZ3.addBlock(blockZ3, blocksMap, Blocks, Chunks);
-        blockZ4.addBlock(blockZ4, blocksMap, Blocks, Chunks);
+
         
 
     #pragma endregion
@@ -864,10 +861,19 @@ int main(void)
 
     bool candoonce = true;
 
+    Block sun = Block(9, vec3(2.0f, 2.0f, 2.0f), Color(1.0f, 1.0f, 0.0f, 1.0f), 1, shader, currentTextures, blocksMap);
+    sun.addBlock(sun, blocksMap, Blocks, Chunks);
+
     
     while (!glfwWindowShouldClose(window))
     {
-        auto startTime = std::chrono::steady_clock::now();     
+        auto startTime = std::chrono::steady_clock::now();
+        
+        skyLight = rotate(startSkyLight, radians(40.0f * GameTimer.time()), vec3(0,0,1));
+
+        Chunks[0][0].blocks[9][0].position = vec3(GameTimer.time(), 0, 0);
+        Chunks[0][0].blocks[9][0].Recalculate();
+
 
         #pragma region INICIO DEL LOOP
         
@@ -1023,6 +1029,64 @@ int main(void)
                 BlockPlaceTimer.ResetTimer();
             }
             
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+        {
+            //vec3 Pos = vec3(floor(camera.entity.position.x + 2), floor(camera.entity.position.y), floor(camera.entity.position.z));
+            vec3 Pos = selectedBlockFace;
+
+            vec3 blockCenter = vec3
+            (
+                selectedBlockFace.x + 0.5f,
+                selectedBlockFace.y + 0.5f,
+                selectedBlockFace.z + 0.5f
+            );
+
+            vec3 blockScale = vec3
+            (
+                blockRaycast.scale / 2.0f,
+                blockRaycast.scale / 2.0f,
+                blockRaycast.scale / 2.0f
+            );
+
+            if (!isBlock(Pos) && !camera.entity.isCollidingWithBlock(blockCenter, blockScale) && selectedBlockFace != vec3(-999, -999, -999) && BlockPlaceTimer.time() > 0.25f)
+            {
+                Block posBlock = Block(26, Pos, Color(), 1, shader, currentTextures, blocksMap);
+                posBlock.addBlock(posBlock, blocksMap, Blocks, Chunks);
+
+                BlockPlaceTimer.ResetTimer();
+            }
+
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+        {
+            //vec3 Pos = vec3(floor(camera.entity.position.x + 2), floor(camera.entity.position.y), floor(camera.entity.position.z));
+            vec3 Pos = selectedBlockFace;
+
+            vec3 blockCenter = vec3
+            (
+                selectedBlockFace.x + 0.5f,
+                selectedBlockFace.y + 0.5f,
+                selectedBlockFace.z + 0.5f
+            );
+
+            vec3 blockScale = vec3
+            (
+                blockRaycast.scale / 2.0f,
+                blockRaycast.scale / 2.0f,
+                blockRaycast.scale / 2.0f
+            );
+
+            if (!isBlock(Pos) && !camera.entity.isCollidingWithBlock(blockCenter, blockScale) && selectedBlockFace != vec3(-999, -999, -999) && BlockPlaceTimer.time() > 0.25f)
+            {
+                Block posBlock = Block(27, Pos, Color(), 1, shader, currentTextures, blocksMap);
+                posBlock.addBlock(posBlock, blocksMap, Blocks, Chunks);
+
+                BlockPlaceTimer.ResetTimer();
+            }
+
         }
 
 //---------------------------RENDER---------------------------------------
@@ -1183,7 +1247,6 @@ int main(void)
         
 
         #pragma endregion  
-
 
 
 

@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <algorithm>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -92,6 +93,20 @@ Block::Block(int id, vec3 position, Color color, int scale, unsigned int shader,
         case 25:
             TexturePath = "res/Textures/block/redstone_lamp_on.png";
             brightness = 16;
+            brightDistance = 12;
+            lightTint = vec4(2, 0.3, 0.3, 0);
+            break;
+        case 26:
+            TexturePath = "res/Textures/block/glowstone.png";
+            brightness = 16;
+            brightDistance = 12;
+            lightTint = vec4(1, 1, 0, 0);
+            break;
+        case 27:
+            TexturePath = "res/Textures/block/sea_lantern_edit.png";
+            brightness = 16;
+            brightDistance = 12;
+            lightTint = vec4(0, 0, 1, 0);
             break;
 
         default:
@@ -188,6 +203,11 @@ extern vec3 skyLight;
 extern int ChunksRenderDistance;
 extern int ChunksSize;
 
+float LightSmoothFunction(float x)
+{
+    return (-pow(x, 2) + 1);
+}
+
 
 void Block::Create()
 {
@@ -271,60 +291,76 @@ void Block::Create()
         if (brightness == 0)
         {
             vector<Chunk*> chunksAround = GetChunksAroundBlock(this); //TODO: ALMACENAR ESTO EN UNA VARIABLE DE BLOCK PARA NO RECALCULARLO CADA FRAME
+            vector<vec4> lightTintColors;
 
             for (int i = 0; i < chunksAround.size(); i++)
             {
                 for (int b = 0; b < chunksAround[i]->BrightBlocks.size(); b++)
                 {
-                    vec3 blockPos = vec3(chunksAround[i]->BrightBlocks[b].x, chunksAround[i]->BrightBlocks[b].y, chunksAround[i]->BrightBlocks[b].z);
+                    vec3 blockPos = vec3(chunksAround[i]->BrightBlocks[b][0], chunksAround[i]->BrightBlocks[b][1], chunksAround[i]->BrightBlocks[b][2]);
                     float dist = length(blockPos - position);
-                    float limit = chunksAround[i]->BrightBlocks[b].w / 2;
+                    float light = chunksAround[i]->BrightBlocks[b][3];
+                    float maxDist = chunksAround[i]->BrightBlocks[b][4];
+                    float distanceController = 1.5f;
 
-                    if (dist < limit)
+                    if (dist <= maxDist)
                     {
+                        bool hasReceivedLight = false;
+
                         if (blockPos.x > position.x)
                         {
-                            if (positiveLighting.x < limit - dist)
+                            if (positiveLighting.x < light * LightSmoothFunction(dist / maxDist))
                             {
-                                positiveLighting.x = limit - dist;
+                                positiveLighting.x = light * LightSmoothFunction(dist / maxDist);
+                                hasReceivedLight = true;
                             }
                         }
                         else
                         {
-                            if (negativeLighting.x < limit - dist)
+                            if (negativeLighting.x < light * LightSmoothFunction(dist / maxDist))
                             {
-                                negativeLighting.x = limit - dist;
+                                negativeLighting.x = light * LightSmoothFunction(dist / maxDist);
+                                hasReceivedLight = true;
                             }
                         }
 
                         if (blockPos.y > position.y)
                         {
-                            if (positiveLighting.y < limit - dist)
+                            if (positiveLighting.y < light * LightSmoothFunction(dist / maxDist))
                             {
-                                positiveLighting.y = limit - dist;
+                                positiveLighting.y = light * LightSmoothFunction(dist / maxDist);
+                                hasReceivedLight = true;
                             }
                         }
                         else
                         {
-                            if (negativeLighting.y < limit - dist)
+                            if (negativeLighting.y < light * LightSmoothFunction(dist / maxDist))
                             {
-                                negativeLighting.y = limit - dist;
+                                negativeLighting.y = light * LightSmoothFunction(dist / maxDist);
+                                hasReceivedLight = true;
                             }
                         }
 
                         if (blockPos.z > position.z)
                         {
-                            if (positiveLighting.z < limit - dist)
+                            if (positiveLighting.z < light * LightSmoothFunction(dist / maxDist))
                             {
-                                positiveLighting.z = limit - dist;
+                                positiveLighting.z = light * LightSmoothFunction(dist / maxDist);
+                                hasReceivedLight = true;
                             }
                         }
                         else
                         {
-                            if (negativeLighting.z < limit - dist)
+                            if (negativeLighting.z < light * LightSmoothFunction(dist / light * distanceController))
                             {
-                                negativeLighting.z = limit - dist;
+                                negativeLighting.z = light * LightSmoothFunction(dist / light * distanceController);
+                                hasReceivedLight = true;
                             }
+                        }
+
+                        if (hasReceivedLight)
+                        {
+                            //lightTintColors.push_back(vec4(chunksAround[i]->BrightBlocks[b][5], chunksAround[i]->BrightBlocks[b][6], chunksAround[i]->BrightBlocks[b][7], 0));
                         }
                     }
                 }
@@ -332,6 +368,29 @@ void Block::Create()
 
             glUniform3fv(glGetUniformLocation(shader, "u_positiveLighting"), 1, glm::value_ptr(positiveLighting));
             glUniform3fv(glGetUniformLocation(shader, "u_negativeLighting"), 1, glm::value_ptr(negativeLighting));
+
+            vec4 finalTintColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+            if (lightTintColors.size() > 0 && false)
+            {
+                for (int c = 0; c < lightTintColors.size(); c++)
+                {
+                    finalTintColor.x += lightTintColors[c].x;
+                    finalTintColor.x /= 2.0f;
+                    finalTintColor.y += lightTintColors[c].y;
+                    finalTintColor.y /= 2.0f;
+                    finalTintColor.z += lightTintColors[c].z;
+                    finalTintColor.z /= 2.0f;
+                }
+            }
+            else
+            {
+                finalTintColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            }
+            
+            //EL FINALTINT NO ESTÁ MULTIPLICADO EN EL SHADER
+
+            //glUniform4fv(glGetUniformLocation(shader, "u_lightTint"), 1, glm::value_ptr(finalTintColor));
 
 
             positiveLighting = vec3(0, 0, 0);
@@ -377,11 +436,9 @@ void Block::Create()
             if (regenerateBuffers)
             {
 
-                #pragma region VERTICES E INDICES
+                #pragma region VERTICES E INDICES       
 
-                
-
-                if (!hasVertices)
+                if (regenerateVertices)
                 {
                     int vertexIndex = 0;
 
@@ -474,7 +531,7 @@ void Block::Create()
                         vertexIndex += sizeof(leftFace) / sizeof(leftFace[0]);
                     }
 
-                    hasVertices = true;
+                    regenerateVertices = false;
                 }
 
 
@@ -885,9 +942,7 @@ void Block::Create()
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
         }
 
-        //test = false;
         regenerateBuffers = false;
-        
          
 
         #pragma endregion

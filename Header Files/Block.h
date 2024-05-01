@@ -28,7 +28,8 @@ public:
     //vector<vector> de Bloques que contiene el Chunk ordenados tal que [blockType][CreationOrder]
     vector<vector<Block>> blocks;
 
-    vector<vec4> BrightBlocks;
+    //{x, y, z, light, dist, r, g, b}
+    vector<vector<float>> BrightBlocks;
 
     //Cada posicion x y z se asocia a 2 index para el vector<vector<Block>> blocks, tal que [blockType][CreationOrder]
     BlocksMap blocksMap;
@@ -147,7 +148,7 @@ public:
         22, 23, 20
     };
 
-    bool hasVertices = false;
+    bool regenerateVertices = true;
 
 	unsigned int shader;
 
@@ -173,6 +174,8 @@ public:
     #pragma region Lighting
 
     int brightness = 0;
+    float brightDistance = 12;
+    vec4 lightTint = vec4(1, 1, 0.3f, 0);
     vec3 positiveLighting = vec3(0, 0, 0);
     vec3 negativeLighting = vec3(0, 0, 0);
 
@@ -198,7 +201,7 @@ public:
     {
         regenerateBuffers = true;
         rewriteAllVariables = true;
-        hasVertices = false;
+        regenerateVertices = true;
     }
 
 
@@ -260,7 +263,8 @@ public:
 
                     if (block.brightness > 0)
                     {
-                        Chunks[i][u].BrightBlocks.push_back(vec4(block.position, block.brightness));
+                        vector<float> brightBlockData = { block.position.x, block.position.y, block.position.z, (float)block.brightness, block.brightDistance, block.lightTint.x, block.lightTint.y, block.lightTint.z};
+                        Chunks[i][u].BrightBlocks.push_back(brightBlockData);
                     }
                 }
             }
