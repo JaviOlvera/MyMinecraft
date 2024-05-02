@@ -880,7 +880,7 @@ int main(void)
     {
         auto startTime = std::chrono::steady_clock::now();
 
-        dayTime = ((GameTimer.time() / dayDuration) - floor(GameTimer.time() / dayDuration))*10;
+        dayTime = ((GameTimer.time() / dayDuration) - floor(GameTimer.time() / dayDuration))* dayDuration;
         
         skyLight = rotate(startSkyLight, radians(dayTime * -360.0f / dayDuration), vec3(0,0,1));
 
