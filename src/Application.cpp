@@ -38,14 +38,14 @@
 
 #include "FastNoiseLite.h"
 
-#include "Physics.h"
+
 #include "Camera.h"
 #include "Utility.h"
 #include "Utility.h"
 #include "Texture.h"
 #include "BlockSearch.h"
 #include "Timer.h"
-
+#include "Physics.h"
 
 
 using namespace std;
@@ -494,6 +494,143 @@ float lerp3(float a, float b, float c, float t)
     return (1.0f - t) * ((1.0f - t) * a + t * b) + t * ((1.0f - t) * b + t * c);
 }
 
+bool lightCalc = false;
+
+
+void SmoothShadows(int c, int e, Entity camera)
+{
+    //Second Shadow
+    for (int i = 0; i < Chunks[c][e].blocks.size(); i++)
+    {
+        for (int u = 0; u < Chunks[c][e].blocks[i].size(); u++)
+        {
+
+            vec3 pos = Chunks[c][e].blocks[i][u].position + vec3(0, 1, 0);
+
+            if (true /*Chunks[c][e].blocks[i][u].canOclude && !isBlock(pos)*/)
+            {
+                vector<Block> sideBlocks;
+
+                for (int x = -1; x <= 1; x++)
+                {
+                    for (int z = -1; z <= 1; z++)
+                    {
+                        vec3 pos = Chunks[c][e].blocks[i][u].position + vec3(x, 0, z);
+                        Block block = helpBlock.GetBlock(pos.x, pos.y, pos.z, blocksMap, Blocks, Chunks);
+
+                        if (block.id != -2)
+                        {
+                            sideBlocks.push_back(block);
+                        }
+                    }
+                }
+
+                int aroundDarkness = 0;
+
+                int averageLight = 0;
+
+                for (int b = 0; b < sideBlocks.size(); b++)
+                {
+                    if (sideBlocks[b].lightLevel == 15)
+                    {
+                        //aroundDarkness++;
+                    }
+
+                    averageLight += sideBlocks[b].lightLevel;
+                }
+
+                averageLight /= sideBlocks.size();
+
+                if (aroundDarkness >= 2)
+                {
+                    //Chunks[c][e].blocks[i][u].lightLevel--;
+                }
+
+                Chunks[c][e].blocks[i][u].lightLevel = averageLight;
+                Chunks[c][e].blocks[i][u].sideBlocks = sideBlocks.size();
+            }
+
+        }
+    }
+
+}
+
+
+void CalculateLighting(Entity camera)
+{
+    if (!lightCalc)
+    {
+        lightCalc = true;
+
+        for (int c = 0; c < Chunks.size(); c++)
+        {
+            for (int e = 0; e < Chunks[c].size(); e++)
+            {
+                bool renderChunk = false;
+
+                for (int r = -ChunksRenderDistance; r <= ChunksRenderDistance; r++)
+                {
+                    for (int r2 = -ChunksRenderDistance; r2 <= ChunksRenderDistance; r2++)
+                    {
+                        if (camera.position.x + ChunksSize * r > Chunks[c][e].position.x && camera.position.x + ChunksSize * r2 < Chunks[c][e].position.x + Chunks[c][e].size &&
+                            camera.position.z + ChunksSize * r > Chunks[c][e].position.y && camera.position.z + ChunksSize * r2 < Chunks[c][e].position.y + Chunks[c][e].size)
+                        {
+                            renderChunk = true;
+                        }
+                    }
+                }
+
+                if (renderChunk)
+                {
+                    vector<vector<int>> TopBlocksPos(ChunksSize, vector<int>(ChunksSize, -999));
+
+                    //Top Blocks
+                    for (int i = 0; i < Chunks[c][e].blocks.size(); i++)
+                    {
+                        for (int u = 0; u < Chunks[c][e].blocks[i].size(); u++)
+                        {
+                            int blockPosX = ((Chunks[c][e].blocks[i][u].position.x / ChunksSize) - floor(Chunks[c][e].blocks[i][u].position.x / ChunksSize)) * ChunksSize;
+                            int blockPosZ = ((Chunks[c][e].blocks[i][u].position.z / ChunksSize) - floor(Chunks[c][e].blocks[i][u].position.z / ChunksSize)) * ChunksSize;
+
+                            if (Chunks[c][e].blocks[i][u].hasShadow && TopBlocksPos[blockPosX][blockPosZ] < Chunks[c][e].blocks[i][u].position.y)
+                            {
+                                TopBlocksPos[blockPosX][blockPosZ] = Chunks[c][e].blocks[i][u].position.y;
+                            }
+                        }
+                    }
+
+                    //First Shadow
+
+                    for (int i = 0; i < Chunks[c][e].blocks.size(); i++)
+                    {
+                        for (int u = 0; u < Chunks[c][e].blocks[i].size(); u++)
+                        {
+                            vec3 pos = Chunks[c][e].blocks[i][u].position + vec3(0, 1, 0);
+                            Block topBlock = helpBlock.GetBlock(pos.x, pos.y, pos.z, blocksMap, Blocks, Chunks);
+
+                            if (true /*topBlock.id == -2 || (topBlock.id != -2 && topBlock.canOclude)*/)
+                            {
+                                int blockPosX = ((Chunks[c][e].blocks[i][u].position.x / ChunksSize) - floor(Chunks[c][e].blocks[i][u].position.x / ChunksSize)) * ChunksSize;
+                                int blockPosZ = ((Chunks[c][e].blocks[i][u].position.z / ChunksSize) - floor(Chunks[c][e].blocks[i][u].position.z / ChunksSize)) * ChunksSize;
+
+                                if (TopBlocksPos[blockPosX][blockPosZ] > Chunks[c][e].blocks[i][u].position.y)
+                                {
+                                    Chunks[c][e].blocks[i][u].lightLevel = 2;
+                                }
+                            }
+
+                        }
+                    }
+                    
+                    SmoothShadows(c, e, camera);
+                    SmoothShadows(c, e, camera);                                 
+                }
+            }
+        }
+    }
+}
+
+
 #pragma endregion
 
 
@@ -878,6 +1015,8 @@ int main(void)
     
     while (!glfwWindowShouldClose(window))
     {
+        #pragma region DAYTIME
+
         auto startTime = std::chrono::steady_clock::now();
 
         dayTime = ((GameTimer.time() / dayDuration) - floor(GameTimer.time() / dayDuration))* dayDuration;
@@ -913,6 +1052,7 @@ int main(void)
         Chunks[0][0].blocks[9][0].position = vec3(GameTimer.time(), 0, 0);
         Chunks[0][0].blocks[9][0].Recalculate();
 
+        #pragma endregion
 
         #pragma region INICIO DEL LOOP
         
@@ -1027,6 +1167,8 @@ int main(void)
         if (raycasted)
         {
             selectedBlock = blockRaycast.position;
+
+            cout << blockRaycast.sideBlocks << endl;
         }
 
         selectedBlockFace = RayCastBlockFace(camera.entity.position, camera.Orientation, 4.0f, 0.02f);
@@ -1130,7 +1272,7 @@ int main(void)
 
 //---------------------------RENDER---------------------------------------
        
-
+        CalculateLighting(camera.entity);
 
         #pragma region RENDER BLOQUES Y TEXTURAS
         int dbg = 0;

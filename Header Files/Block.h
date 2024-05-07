@@ -44,6 +44,8 @@ class Block
 {
 public:
 
+    int sideBlocks;
+
     bool rewriteAllVariables = true;
 
     bool isSelected = false;
@@ -175,6 +177,8 @@ public:
 
     int brightness = 0;
     float brightDistance = 12;
+    float lightLevel = 16;
+    bool hasShadow = true;
     vec4 lightTint = vec4(1, 1, 0.3f, 0);
     vec3 positiveLighting = vec3(0, 0, 0);
     vec3 negativeLighting = vec3(0, 0, 0);

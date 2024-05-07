@@ -83,12 +83,14 @@ Block::Block(int id, vec3 position, Color color, int scale, unsigned int shader,
             break;
         case 12:
             TexturePath = "res/Textures/block/glass.png";
+            hasShadow = false;
             break;
         case 13:
             TexturePath = "res/Textures/block/grass.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 25:
             TexturePath = "res/Textures/block/redstone_lamp_on.png";
@@ -124,72 +126,84 @@ Block::Block(int id, vec3 position, Color color, int scale, unsigned int shader,
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 15:
             TexturePath = "res/Textures/block/poppy.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 16:
             TexturePath = "res/Textures/block/blue_orchid.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 17:
             TexturePath = "res/Textures/block/allium.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 18:
             TexturePath = "res/Textures/block/azure_bluet.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 19:
             TexturePath = "res/Textures/block/red_tulip.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 20:
             TexturePath = "res/Textures/block/orange_tulip.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 21:
             TexturePath = "res/Textures/block/white_tulip.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 22:
             TexturePath = "res/Textures/block/pink_tulip.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 23:
             TexturePath = "res/Textures/block/oxeye_daisy.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         case 24:
             TexturePath = "res/Textures/block/cornflower.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         default:
             TexturePath = "res/Textures/block/dandelion.png";
             canOclude = false;
             twoQuads = true;
             collidable = false;
+            hasShadow = false;
             break;
         }
     }
@@ -403,6 +417,21 @@ void Block::Create()
         glUniform1f(glGetUniformLocation(shader, "u_dayTime"), dayTime);
         glUniform1f(glGetUniformLocation(shader, "u_dayDuration"), dayDuration);
         glUniform1f(glGetUniformLocation(shader, "u_isEmissive"), (brightness > 0));
+
+        #pragma endregion
+
+
+        #pragma region SUN SHADOWS
+        if (lightLevel == 15)
+        {
+            //color = Color(0.8f, 0.8f, 0.8f, 1);
+        }
+        else if(lightLevel < 16)
+        {
+            //color = Color(lightLevel * 0.1f / 15, lightLevel * 0.1f / 15, lightLevel * 0.1f / 15, 1);
+        }
+
+        color = Color(lightLevel / 16, lightLevel / 16, lightLevel / 16, 1);
 
         #pragma endregion
 
@@ -1016,6 +1045,8 @@ void Block::Draw()
         glEnable(GL_CULL_FACE);
     }
 }
+
+
 
 /*
 Chunk* Block::GetChunk()
