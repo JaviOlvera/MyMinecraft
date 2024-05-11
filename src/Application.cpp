@@ -614,7 +614,7 @@ void CalculateLighting(Entity camera)
                         for (int u = 0; u < Chunks[c][e].blocks[i].size(); u++)
                         {
                             vec3 pos = Chunks[c][e].blocks[i][u].position + vec3(0, 1, 0);
-                            Block topBlock = helpBlock.GetBlock(pos.x, pos.y, pos.z, blocksMap, Blocks, Chunks);
+                            Block* topBlock = GetBlock(vec3(pos.x, pos.y, pos.z));
 
                             if (true /*topBlock.id == -2 || (topBlock.id != -2 && topBlock.canOclude)*/)
                             {
@@ -1172,14 +1172,14 @@ int main(void)
 
         //TODO: HACER QUE EL RAYCAST SEA RECURSIVO, EMPIECE A SALTOS GRANDES Y AL DETECTAR ALGO RETROCEDA A PASOS PEQUEÑOS PARA MAYOR PRECISION Y FPSs
 
-        Block blockRaycast = RayCastBlock(camera.entity.position, camera.Orientation, 4.0f, 0.1f);
-        bool raycasted = blockRaycast.id != -2;
+        Block* blockRaycast = RayCastBlock(camera.entity.position, camera.Orientation, 4.0f, 0.1f);
+        bool raycasted = blockRaycast != nullptr;
 
         if (raycasted)
         {
-            selectedBlock = blockRaycast.position;
+            selectedBlock = blockRaycast->position;
 
-            cout << blockRaycast.lightLevels << endl;
+            cout << blockRaycast->lightLevels << endl;
         }
 
         selectedBlockFace = RayCastBlockFace(camera.entity.position, camera.Orientation, 4.0f, 0.02f);
@@ -1208,9 +1208,9 @@ int main(void)
 
             vec3 blockScale = vec3
             (
-                blockRaycast.scale / 2.0f,
-                blockRaycast.scale / 2.0f,
-                blockRaycast.scale / 2.0f
+                blockRaycast->scale / 2.0f,
+                blockRaycast->scale / 2.0f,
+                blockRaycast->scale / 2.0f
             );
 
             if (!isBlock(Pos) && !camera.entity.isCollidingWithBlock(blockCenter, blockScale) && selectedBlockFace != vec3(-999, -999, -999) && BlockPlaceTimer.time() > 0.25f)
@@ -1237,9 +1237,9 @@ int main(void)
 
             vec3 blockScale = vec3
             (
-                blockRaycast.scale / 2.0f,
-                blockRaycast.scale / 2.0f,
-                blockRaycast.scale / 2.0f
+                blockRaycast->scale / 2.0f,
+                blockRaycast->scale / 2.0f,
+                blockRaycast->scale / 2.0f
             );
 
             if (!isBlock(Pos) && !camera.entity.isCollidingWithBlock(blockCenter, blockScale) && selectedBlockFace != vec3(-999, -999, -999) && BlockPlaceTimer.time() > 0.25f)
@@ -1266,9 +1266,9 @@ int main(void)
 
             vec3 blockScale = vec3
             (
-                blockRaycast.scale / 2.0f,
-                blockRaycast.scale / 2.0f,
-                blockRaycast.scale / 2.0f
+                blockRaycast->scale / 2.0f,
+                blockRaycast->scale / 2.0f,
+                blockRaycast->scale / 2.0f
             );
 
             if (!isBlock(Pos) && !camera.entity.isCollidingWithBlock(blockCenter, blockScale) && selectedBlockFace != vec3(-999, -999, -999) && BlockPlaceTimer.time() > 0.25f)

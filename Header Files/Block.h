@@ -13,8 +13,9 @@ using namespace glm;
 typedef std::unordered_map<std::tuple<int, int, int>, std::array<int, 2>, TupleHash> BlocksMap;
 
 
-// Forward declaration de la clase Block
+// Forward declarations
 class Block;
+Block* GetBlock(vec3 pos);
 
 class Chunk
 {
@@ -39,6 +40,7 @@ public:
 
     }
 };
+
 
 class Block
 {
@@ -211,7 +213,7 @@ public:
         regenerateVertices = true;
     }
 
-
+    /*
     static Block GetBlock(int x, int y, int z, BlocksMap& blocksMap, std::vector<std::vector<Block>>& Blocks, std::vector<std::vector<Chunk>>& Chunks)
     {
         for (int i = 0; i < Chunks.size(); i++)
@@ -241,7 +243,7 @@ public:
         std::vector<std::string> emptyTextures;
         return Block(-2, emptyTextures, blocksMap);
     }
-
+    */
 
     static void addBlock(Block block, BlocksMap& blocksMap, std::vector<std::vector<Block>>& Blocks, std::vector<std::vector<Chunk>>& Chunks)
     {
@@ -299,16 +301,16 @@ public:
 
     static bool checkOclude(int x, int y, int z, BlocksMap& blocksMap, std::vector<std::vector<Block>>& Blocks, std::vector<std::vector<Chunk>>& Chunks)
     {
-        Block block = GetBlock(x, y, z, blocksMap, Blocks, Chunks);
+        Block* block = GetBlock(vec3(x, y, z));
 
-        return (block.id >= 0 && block.canOclude);
+        return (block != nullptr && block->id >= 0 && block->canOclude);
     }
 
     static bool checkCollidable(int x, int y, int z, BlocksMap& blocksMap, std::vector<std::vector<Block>>& Blocks, std::vector<std::vector<Chunk>>& Chunks)
     {
-        Block block = GetBlock(x, y, z, blocksMap, Blocks, Chunks);
+        Block* block = GetBlock(vec3(x, y, z));
 
-        return (block.id >= 0 && block.collidable);
+        return (block != nullptr && block->id >= 0 && block->collidable);
         
     }
     

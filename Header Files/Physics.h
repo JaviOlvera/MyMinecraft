@@ -352,7 +352,7 @@ static void AdjustEntityCollision(Entity& entity, vec3& oldPosition, vec3& final
                 {
                     if (helpBlock.checkCollidable(floor(entity.position.x + x), floor(entity.position.y + y), floor(entity.position.z + z), blocksMap, Blocks, Chunks))
                     {
-                        Block checkBlock = helpBlock.GetBlock(floor(entity.position.x + x), floor(entity.position.y + y), floor(entity.position.z + z), blocksMap, Blocks, Chunks);
+                        Block* checkBlock = GetBlock(vec3(floor(entity.position.x + x), floor(entity.position.y + y), floor(entity.position.z + z)));
 
                         vec3 blockCenter = vec3
                         (
@@ -363,9 +363,9 @@ static void AdjustEntityCollision(Entity& entity, vec3& oldPosition, vec3& final
 
                         vec3 blockScale = vec3
                         (
-                            checkBlock.scale / 2.0f,
-                            checkBlock.scale / 2.0f,
-                            checkBlock.scale / 2.0f
+                            checkBlock->scale / 2.0f,
+                            checkBlock->scale / 2.0f,
+                            checkBlock->scale / 2.0f
                         );
 
                         CheckEntityCollision(entity, oldPosition, blockCenter, blockScale, collisionOffset);
@@ -428,7 +428,7 @@ static void AdjustEntityCollision(Entity& entity, vec3& oldPosition, vec3& final
     entity.wasFalling = entity.falling;
 }
 
-static Block RayCastBlock(vec3 origin, vec3 dir, float length = 100.0f, float precision = 0.5f)
+static Block* RayCastBlock(vec3 origin, vec3 dir, float length = 100.0f, float precision = 0.5f)
 {
     vec3 pos = origin;
 
@@ -436,15 +436,15 @@ static Block RayCastBlock(vec3 origin, vec3 dir, float length = 100.0f, float pr
     {
         if (isBlock(vec3(floor(pos.x), floor(pos.y), floor(pos.z))))
         {
-            return helpBlock.GetBlock(floor(pos.x), floor(pos.y), floor(pos.z), blocksMap, Blocks, Chunks);
+            return GetBlock(vec3(floor(pos.x), floor(pos.y), floor(pos.z)));
             break;
         }
 
         pos += normalize(dir) * precision;
     }
 
-    std::vector<std::string> emptyTextures;
-    return Block(-2, emptyTextures, blocksMap);
+    //std::vector<std::string> emptyTextures;
+    return nullptr;
 }
 
 static vec3 RayCastBlockFace(vec3 origin, vec3 dir, float length = 100.0f, float precision = 0.5f)
