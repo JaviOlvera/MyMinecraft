@@ -44,17 +44,19 @@ class Block
 {
 public:
 
-    int sideBlocks;
+    int lightLevels = 0;
 
     bool rewriteAllVariables = true;
 
     bool isSelected = false;
 
+    bool isOcluded = false;
+
     #pragma region Create Texture Variables
 
     string texturePath;
 
-    bool isSolidColor;
+    bool isSolidColor = false;
 
     string bottomTexturePath;
     string topTexturePath;
@@ -178,6 +180,7 @@ public:
     int brightness = 0;
     float brightDistance = 12;
     float lightLevel = 16;
+    bool coveredFromSun = false;
     bool hasShadow = true;
     vec4 lightTint = vec4(1, 1, 0.3f, 0);
     vec3 positiveLighting = vec3(0, 0, 0);
@@ -197,7 +200,7 @@ public:
 
     ~Block();
 
-
+    void DefineOcluded();
 	void Create();
 	void Draw();
 
@@ -431,6 +434,7 @@ static bool isOcluded(vec3 pos, Chunk* chunk)
 
 extern vector<vector<Chunk>> Chunks;
 extern int ChunksSize;
+extern BlocksMap blocksMap;
 
 static Chunk* GetChunk(vec2 pos)
 {
@@ -530,4 +534,34 @@ static bool isBlock(vec3 pos)
     }
 
     return false;
+}
+
+static Block* GetBlock(vec3 pos)
+{
+    for (int i = 0; i < Chunks.size(); i++)
+    {
+        for (int u = 0; u < Chunks[i].size(); u++)
+        {
+            if (pos.x >= Chunks[i][u].position.x && pos.x < Chunks[i][u].position.x + Chunks[i][u].size &&
+                pos.z >= Chunks[i][u].position.y && pos.z < Chunks[i][u].position.y + Chunks[i][u].size)
+            {
+                auto iter = Chunks[i][u].blocksMap.find(std::make_tuple(pos.x, pos.y, pos.z));
+
+                if (iter != Chunks[i][u].blocksMap.end())
+                {
+                    //return Blocks[iter->second[0]][iter->second[1]];
+                    return &Chunks[i][u].blocks[iter->second[0]][iter->second[1]];
+                }
+                else
+                {
+                    //std::cout << "ERROR: La clave <" << x << ", " << y << ", " << z << "> no se encontró en BlocksMap" << std::endl;
+                    //std::vector<std::string> emptyTextures;
+                    return nullptr;
+                }
+            }
+        }
+    }
+
+    //std::vector<std::string> emptyTextures;
+    return nullptr;
 }

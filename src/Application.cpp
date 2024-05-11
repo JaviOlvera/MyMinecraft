@@ -497,6 +497,23 @@ float lerp3(float a, float b, float c, float t)
 bool lightCalc = false;
 
 
+void DefineOcludedBlocks()
+{
+    for (int c = 0; c < Chunks.size(); c++)
+    {
+        for (int e = 0; e < Chunks[c].size(); e++)
+        {
+            for (int i = 0; i < Chunks[c][e].blocks.size(); i++)
+            {
+                for (int u = 0; u < Chunks[c][e].blocks[i].size(); u++)
+                {
+                    Chunks[c][e].blocks[i][u].DefineOcluded();
+                }
+            }
+        }
+    }
+}
+
 void SmoothShadows(int c, int e, Entity camera)
 {
     //Second Shadow
@@ -504,60 +521,51 @@ void SmoothShadows(int c, int e, Entity camera)
     {
         for (int u = 0; u < Chunks[c][e].blocks[i].size(); u++)
         {
-
-            vec3 pos = Chunks[c][e].blocks[i][u].position + vec3(0, 1, 0);
-
-            if (true /*Chunks[c][e].blocks[i][u].canOclude && !isBlock(pos)*/)
+            if (Chunks[c][e].blocks[i][u].lightLevel == 16 && !Chunks[c][e].blocks[i][u].isOcluded)
             {
-                vector<Block> sideBlocks;
+                int radius = 3;
+                vector<vec2> lightLevels;
+                int ex = 0;
 
-                for (int x = -1; x <= 1; x++)
+                for (int x = -radius; x <= radius; x++)
                 {
-                    for (int z = -1; z <= 1; z++)
+                    for (int z = -radius; z <= radius; z++)
                     {
-                        vec3 pos = Chunks[c][e].blocks[i][u].position + vec3(x, 0, z);
-                        Block block = helpBlock.GetBlock(pos.x, pos.y, pos.z, blocksMap, Blocks, Chunks);
-
-                        if (block.id != -2)
+                        for (int y = -radius; y <= radius; y++)
                         {
-                            sideBlocks.push_back(block);
+                            vec3 pos = Chunks[c][e].blocks[i][u].position + vec3(x, y, z);
+                            Block* block = GetBlock(pos);
+
+                            if (block != nullptr && block->id != 2 && !block->isOcluded && block->coveredFromSun && block->canOclude)
+                            {
+                                ex++;
+                                lightLevels.push_back(vec2(block->lightLevel, length(block->position - Chunks[c][e].blocks[i][u].position)));
+                            }
                         }
                     }
                 }
 
-                int aroundDarkness = 0;
+                float lightLevel = 0;
 
-                int averageLight = 0;
-
-                for (int b = 0; b < sideBlocks.size(); b++)
+                for (int j = 0; j < lightLevels.size(); j++)
                 {
-                    if (sideBlocks[b].lightLevel == 15)
-                    {
-                        //aroundDarkness++;
-                    }
-
-                    averageLight += sideBlocks[b].lightLevel;
+                    lightLevel += lightLevels[j].x * (lightLevels[j].y / radius);
                 }
 
-                averageLight /= sideBlocks.size();
+                //lightLevel /= lightLevels.size();
 
-                if (aroundDarkness >= 2)
-                {
-                    //Chunks[c][e].blocks[i][u].lightLevel--;
-                }
-
-                Chunks[c][e].blocks[i][u].lightLevel = averageLight;
-                Chunks[c][e].blocks[i][u].sideBlocks = sideBlocks.size();
+                Chunks[c][e].blocks[i][u].lightLevel -= lightLevel;
+                Chunks[c][e].blocks[i][u].lightLevels = lightLevels.size();
             }
-
         }
     }
 
 }
 
-
 void CalculateLighting(Entity camera)
 {
+    DefineOcludedBlocks();
+
     if (!lightCalc)
     {
         lightCalc = true;
@@ -616,6 +624,7 @@ void CalculateLighting(Entity camera)
                                 if (TopBlocksPos[blockPosX][blockPosZ] > Chunks[c][e].blocks[i][u].position.y)
                                 {
                                     Chunks[c][e].blocks[i][u].lightLevel = 2;
+                                    Chunks[c][e].blocks[i][u].coveredFromSun = true;
                                 }
                             }
 
@@ -623,7 +632,7 @@ void CalculateLighting(Entity camera)
                     }
                     
                     SmoothShadows(c, e, camera);
-                    SmoothShadows(c, e, camera);                                 
+                    //SmoothShadows(c, e, camera);                                 
                 }
             }
         }
@@ -771,7 +780,7 @@ int main(void)
 
         
         vec2 dirtLayers = vec2(1, 3);
-        int minHeight = -10;
+        int minHeight = -20;
         int groundHeight = 10;
 
         unsigned int blocksAmount = 0;
@@ -1013,6 +1022,8 @@ int main(void)
     sun.addBlock(sun, blocksMap, Blocks, Chunks);
 
     
+    CalculateLighting(camera.entity);
+
     while (!glfwWindowShouldClose(window))
     {
         #pragma region DAYTIME
@@ -1168,7 +1179,7 @@ int main(void)
         {
             selectedBlock = blockRaycast.position;
 
-            cout << blockRaycast.sideBlocks << endl;
+            cout << blockRaycast.lightLevels << endl;
         }
 
         selectedBlockFace = RayCastBlockFace(camera.entity.position, camera.Orientation, 4.0f, 0.02f);
@@ -1272,7 +1283,7 @@ int main(void)
 
 //---------------------------RENDER---------------------------------------
        
-        CalculateLighting(camera.entity);
+        
 
         #pragma region RENDER BLOQUES Y TEXTURAS
         int dbg = 0;

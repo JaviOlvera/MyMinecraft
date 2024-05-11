@@ -209,6 +209,9 @@ Block::Block(int id, vec3 position, Color color, int scale, unsigned int shader,
     }
 
     #pragma endregion
+
+
+
 }
 
 extern vector<vector<Chunk>> Chunks;
@@ -224,6 +227,17 @@ float LightSmoothFunction(float x)
     return (-pow(x, 2) + 1);
 }
 
+void Block::DefineOcluded()
+{
+    hasFrontFace = isSolidColor || !checkOclude((int)position.x, (int)position.y, (int)position.z + 1, blocksMap, Blocks, Chunks);
+    hasBackFace = isSolidColor || !checkOclude((int)position.x, (int)position.y, (int)position.z - 1, blocksMap, Blocks, Chunks);
+    hasTopFace = isSolidColor || !checkOclude((int)position.x, (int)position.y + 1, (int)position.z, blocksMap, Blocks, Chunks);
+    hasBottomFace = isSolidColor || !checkOclude((int)position.x, (int)position.y - 1, (int)position.z, blocksMap, Blocks, Chunks);
+    hasRightFace = isSolidColor || !checkOclude((int)position.x + 1, (int)position.y, (int)position.z, blocksMap, Blocks, Chunks);
+    hasLeftFace = isSolidColor || !checkOclude((int)position.x - 1, (int)position.y, (int)position.z, blocksMap, Blocks, Chunks);
+
+    isOcluded = (!hasFrontFace && !hasBackFace && !hasTopFace && !hasBottomFace && !hasRightFace && !hasLeftFace);
+}
 
 void Block::Create()
 {
@@ -265,6 +279,8 @@ void Block::Create()
         diffBack = (backTexturePath != "" && hasBackFace);
         diffRight = (rightTexturePath != "" && hasRightFace);
         diffLeft = (leftTexturePath != "" && hasLeftFace);
+
+        isOcluded = !hasFrontFace && !hasBackFace && !hasTopFace && !hasBottomFace && !hasRightFace && !hasLeftFace;
 
         rewriteAllVariables = false;
     }
