@@ -536,7 +536,7 @@ void SmoothShadows(int c, int e, Entity camera)
                             vec3 pos = Chunks[c][e].blocks[i][u].position + vec3(x, y, z);
                             Block* block = GetBlock(pos);
 
-                            if (block != nullptr && block->id != 2 && !block->isOcluded && block->coveredFromSun && block->canOclude)
+                            if (block != nullptr && block->id >= 0 && !block->isOcluded && block->coveredFromSun && block->canOclude)
                             {
                                 ex++;
                                 lightLevels.push_back(vec2(block->lightLevel, length(block->position - Chunks[c][e].blocks[i][u].position)));
@@ -545,17 +545,28 @@ void SmoothShadows(int c, int e, Entity camera)
                     }
                 }
 
-                float lightLevel = 0;
-
-                for (int j = 0; j < lightLevels.size(); j++)
+                if (lightLevels.size() > 0)
                 {
-                    lightLevel += lightLevels[j].x * (lightLevels[j].y / radius);
+
+                    float lightLevel = 0;
+
+                    for (int j = 0; j < lightLevels.size(); j++)
+                    {
+                        Chunks[c][e].blocks[i][u].lightLevel = mix(Chunks[c][e].blocks[i][u].lightLevel, lightLevels[j].x, pow(1 - (lightLevels[j].y / radius), 2));
+                    }
+
+                    if (Chunks[c][e].blocks[i][u].lightLevel > 16)
+                    {
+                        Chunks[c][e].blocks[i][u].lightLevel = 16;
+                    }
+
+                    //(x-1)^2
+
+                    //lightLevel /= lightLevels.size();
+
+                    //Chunks[c][e].blocks[i][u].lightLevel -= lightLevel;
+                    Chunks[c][e].blocks[i][u].lightLevels = lightLevels.size();
                 }
-
-                //lightLevel /= lightLevels.size();
-
-                Chunks[c][e].blocks[i][u].lightLevel -= lightLevel;
-                Chunks[c][e].blocks[i][u].lightLevels = lightLevels.size();
             }
         }
     }
@@ -623,7 +634,7 @@ void CalculateLighting(Entity camera)
 
                                 if (TopBlocksPos[blockPosX][blockPosZ] > Chunks[c][e].blocks[i][u].position.y)
                                 {
-                                    Chunks[c][e].blocks[i][u].lightLevel = 2;
+                                    Chunks[c][e].blocks[i][u].lightLevel = 10;
                                     Chunks[c][e].blocks[i][u].coveredFromSun = true;
                                 }
                             }
@@ -1179,7 +1190,7 @@ int main(void)
         {
             selectedBlock = blockRaycast->position;
 
-            cout << blockRaycast->lightLevels << endl;
+            cout << blockRaycast->lightLevel << endl;
         }
 
         selectedBlockFace = RayCastBlockFace(camera.entity.position, camera.Orientation, 4.0f, 0.02f);

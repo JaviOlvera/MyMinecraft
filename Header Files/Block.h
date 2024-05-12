@@ -48,13 +48,24 @@ public:
 
     int lightLevels = 0;
 
-    bool rewriteAllVariables = true;
 
+    int id = 0;
+    vec3 position = vec3(0, 0, 0);
+    bool collidable = true;
     bool isSelected = false;
 
+    bool noTransparency = false;
+    bool canOclude = true;
+    bool twoQuads = false;
     bool isOcluded = false;
 
-    #pragma region Create Texture Variables
+    bool isTreeBase = false;
+
+    bool rewriteAllVariables = true;
+
+
+
+    #pragma region Texture & Occlusion Variables
 
     string texturePath;
 
@@ -66,6 +77,18 @@ public:
     string backTexturePath;
     string rightTexturePath;
     string leftTexturePath;
+
+    bool IsSolidColor;
+
+    string TexturePath;
+    string BottomTexturePath;
+    string TopTexturePath;
+    string FrontTexturePath;
+    string BackTexturePath;
+    string RightTexturePath;
+    string LeftTexturePath;
+
+    std::vector<std::string>& currentTextures;
 
     bool hasFrontFace = true;
     bool hasBackFace = true;
@@ -85,36 +108,31 @@ public:
 
 
     #pragma region Other Variables
-
-	int id = 0;
-
-    vec3 position = vec3(0, 0, 0);
+ 
     vec3 rotation = vec3(0, 0, 0);
 	Color color = Color();
-    bool noTransparency = false;
 
 	int scale;
 
     float origin = 0.0f;
 
-    bool isTreeBase = false;
+    unsigned int shader;
 
-    bool canOclude = true;
-    bool twoQuads = false;
+    BlocksMap& blocksMap;
+
+    bool initialized = false;
 
 
-    bool collidable = true;
+    #pragma endregion
+   
 
-    #pragma region Buffers Data
+    #pragma region Buffers Vertices & Indices
 
     bool regenerateBuffers = true;
     // Crear un buffer para las coordenadas de vértices
     unsigned int vbo;
     // Crear un buffer para los índices del cubo
     unsigned int ibo;
-
-    
-
     
 
     unsigned int topQuadVBO;
@@ -123,9 +141,6 @@ public:
     unsigned int backQuadVBO;
     unsigned int rightQuadVBO;
     unsigned int leftQuadVBO;
-
-    #pragma endregion
-
 
     float cubeVertices[6 * 4 * 5] =
     {
@@ -156,35 +171,27 @@ public:
 
     bool regenerateVertices = true;
 
-	unsigned int shader;
-
-	bool IsSolidColor;
-
-	string TexturePath;
-	string BottomTexturePath;
-	string TopTexturePath;
-	string FrontTexturePath;
-	string BackTexturePath;
-	string RightTexturePath;
-	string LeftTexturePath;
-
-	std::vector<std::string>& currentTextures;
-
-    BlocksMap &blocksMap;
-
-	bool initialized = false;
-
     #pragma endregion
 
 
     #pragma region Lighting
 
+    //Amount of light emission
     int brightness = 0;
+    //Max distance where emitted light reaches
     float brightDistance = 12;
+
+    //Light level from 0 (shadow) to 16 (max ligh)
     float lightLevel = 16;
+
+    //Multiplier of color intensity in the shader (depends on lightLevel)
+    float shaderLight = 1;
+
     bool coveredFromSun = false;
     bool hasShadow = true;
+
     vec4 lightTint = vec4(1, 1, 0.3f, 0);
+
     vec3 positiveLighting = vec3(0, 0, 0);
     vec3 negativeLighting = vec3(0, 0, 0);
 

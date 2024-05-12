@@ -438,16 +438,34 @@ void Block::Create()
 
 
         #pragma region SUN SHADOWS
-        if (lightLevel == 15)
+
+        float sunLerp = dayTime / dayDuration;
+        float minLight = 0.0f;
+
+        if (sunLerp > 0.25f && sunLerp < 0.5f)
         {
-            //color = Color(0.8f, 0.8f, 0.8f, 1);
+            shaderLight = (0.25f - (sunLerp - 0.25f)) * 4;
+
+            if (shaderLight > minLight)
+            {
+                shaderLight = minLight;
+            }
         }
-        else if(lightLevel < 16)
+        else if (sunLerp >= 0.5f && sunLerp <= 0.85f)
         {
-            //color = Color(lightLevel * 0.1f / 15, lightLevel * 0.1f / 15, lightLevel * 0.1f / 15, 1);
+            shaderLight = minLight;
+        }
+        else if (sunLerp > 0.85f && sunLerp < 1.0f)
+        {
+            shaderLight = (sunLerp - 0.85f) * 6.67f;
+
+            if (shaderLight > minLight)
+            {
+                shaderLight = minLight;
+            }
         }
 
-        color = Color(lightLevel / 16, lightLevel / 16, lightLevel / 16, 1);
+        color = Color(lightLevel / 16.01f, lightLevel / 16.01f, lightLevel / 16.01f, 1);
 
         #pragma endregion
 
