@@ -47,6 +47,7 @@ class Block
 public:
 
     int lightLevels = 0;
+    float tmpShaderLight = 0;
 
 
     int id = 0;
@@ -183,6 +184,9 @@ public:
 
     //Light level from 0 (shadow) to 16 (max ligh)
     float lightLevel = 16;
+
+    //Light obtained directly from sun
+    float sunLight = 1;
 
     //Multiplier of color intensity in the shader (depends on lightLevel)
     float shaderLight = 1;

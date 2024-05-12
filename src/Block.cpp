@@ -291,7 +291,7 @@ void Block::Create()
     if (hasFrontFace || hasBackFace || hasTopFace || hasBottomFace || hasRightFace || hasLeftFace)
     {
         
-        #pragma region DIRECT LIGHTING
+        #pragma region SUN LIGHT DIRECTION
 
         // Definición de variables
         glm::vec3 _position = vec3(position.x, position.y, position.z);
@@ -318,7 +318,7 @@ void Block::Create()
         #pragma endregion
 
 
-        #pragma region BLOCKS LIGHTING
+        #pragma region LIGHT SOURCES LIGHTING
 
         if (brightness == 0)
         {
@@ -430,44 +430,58 @@ void Block::Create()
         }
 
 
-        glUniform1f(glGetUniformLocation(shader, "u_dayTime"), dayTime);
-        glUniform1f(glGetUniformLocation(shader, "u_dayDuration"), dayDuration);
+        //glUniform1f(glGetUniformLocation(shader, "u_dayTime"), dayTime);
+        //glUniform1f(glGetUniformLocation(shader, "u_dayDuration"), dayDuration);
         glUniform1f(glGetUniformLocation(shader, "u_isEmissive"), (brightness > 0));
+
+        #pragma endregion
+
+
+        #pragma region SUN DIRECT LIGHTING
+
+        float sunLerp = dayTime / dayDuration;
+        float minLight = 0.2f;
+
+        if (sunLerp >= 0.25f && sunLerp < 0.5f)
+        {
+            sunLight = (0.25f - (sunLerp - 0.25f)) * 4;
+        }
+        else if (sunLerp >= 0.5f && sunLerp <= 0.85f)
+        {
+            sunLight = minLight;
+        }
+        else if (sunLerp > 0.85f && sunLerp < 1.0f)
+        {
+            sunLight = (sunLerp - 0.85f) * 6.67f;
+        }
+        else if (sunLerp > 0 && sunLerp < 0.25f)
+        {
+            sunLight = 1;
+        }
+
+        if (sunLight < minLight)
+        {
+            sunLight = minLight;
+        }
 
         #pragma endregion
 
 
         #pragma region SUN SHADOWS
 
-        float sunLerp = dayTime / dayDuration;
-        float minLight = 0.0f;
+        //tmpShaderLight = shaderLight;
 
-        if (sunLerp > 0.25f && sunLerp < 0.5f)
-        {
-            shaderLight = (0.25f - (sunLerp - 0.25f)) * 4;
+        shaderLight = sunLight * (lightLevel / 16.0f);
 
-            if (shaderLight > minLight)
-            {
-                shaderLight = minLight;
-            }
-        }
-        else if (sunLerp >= 0.5f && sunLerp <= 0.85f)
+        if (shaderLight < minLight)
         {
             shaderLight = minLight;
         }
-        else if (sunLerp > 0.85f && sunLerp < 1.0f)
-        {
-            shaderLight = (sunLerp - 0.85f) * 6.67f;
-
-            if (shaderLight > minLight)
-            {
-                shaderLight = minLight;
-            }
-        }
-
-        color = Color(lightLevel / 16.01f, lightLevel / 16.01f, lightLevel / 16.01f, 1);
 
         #pragma endregion
+
+
+        glUniform1f(glGetUniformLocation(shader, "u_shaderLight"), shaderLight);
 
 
         #pragma region BLOCKS SELECTION

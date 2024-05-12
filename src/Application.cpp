@@ -248,7 +248,7 @@ extern vec3 skyLight;
 
 float dayTime = 0;
 extern float dayTime;
-float dayDuration = 20*60;
+float dayDuration = 10;
 extern float dayDuration;
 
 int ChunksRenderDistance = 1;
@@ -1190,7 +1190,7 @@ int main(void)
         {
             selectedBlock = blockRaycast->position;
 
-            cout << blockRaycast->lightLevel << endl;
+            cout << "sunlight: " << blockRaycast->sunLight << endl << "lightLevel / 16: " << (blockRaycast->lightLevel / 16.0f) << endl << "final operation: " << blockRaycast->shaderLight << endl << endl;
         }
 
         selectedBlockFace = RayCastBlockFace(camera.entity.position, camera.Orientation, 4.0f, 0.02f);
